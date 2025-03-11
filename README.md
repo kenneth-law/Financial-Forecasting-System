@@ -24,6 +24,152 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 ## Overview
 This project is designed to build an AI-driven financial forecasting system leveraging PostgreSQL for structured data storage and fine-tuning large language models (LLMs) for market analysis. The system stores ASX 200 stock market data, integrates financial reports, and allows for portfolio tracking. Fine-tuning will be conducted either locally or using AWS cloud-based resources.
 
+## Database Setup Guide
+
+### Setting Up PostgreSQL Database on macOS
+
+#### 1. Install PostgreSQL (if not already installed)
+
+Using Homebrew:
+```bash
+brew install postgresql@15
+brew services start postgresql@15
+```
+
+Verify PostgreSQL is running:
+```bash
+brew services list
+# or
+pg_ctl -D /opt/homebrew/var/postgresql@15 status
+```
+
+#### 2. Create the Database and User
+
+Access the PostgreSQL shell:
+```bash
+psql postgres
+# If that doesn't work, try:
+# sudo -u postgres psql
+```
+
+Create the database:
+```sql
+CREATE DATABASE asx_financials;
+```
+
+Create a user:
+```sql
+CREATE USER asx_user WITH PASSWORD 'asx200';
+```
+
+Grant privileges:
+```sql
+GRANT ALL PRIVILEGES ON DATABASE asx_financials TO asx_user;
+ALTER USER asx_user CREATEDB;
+```
+
+Connect to the database:
+```sql
+\c asx_financials
+```
+
+Grant schema privileges (must run this after connecting to the database):
+```sql
+GRANT ALL ON SCHEMA public TO asx_user;
+```
+
+Verify setup:
+```sql
+\l    -- List databases
+\du   -- List users
+```
+
+Exit PostgreSQL shell:
+```sql
+\q
+```
+
+#### 3. Test Connection with Your New User
+
+```bash
+psql -U asx_user -d asx_financials -h localhost -W
+# Enter password when prompted: asx200
+```
+
+You should see `asx_financials=>` which indicates you're connected successfully.
+
+### Setting Up PostgreSQL Database on Windows
+
+#### 1. Install PostgreSQL
+- Download and install PostgreSQL from [postgresql.org](https://www.postgresql.org/download/windows/)
+- During installation, set a password for the default 'postgres' user
+- Keep note of the port number (default is 5432)
+
+#### 2. Create the Database and User
+
+Open the SQL Shell (psql) from the Start menu, or command prompt:
+```
+psql -U postgres
+```
+
+Follow the same SQL commands as in the macOS section:
+```sql
+CREATE DATABASE asx_financials;
+CREATE USER asx_user WITH PASSWORD 'asx200';
+GRANT ALL PRIVILEGES ON DATABASE asx_financials TO asx_user;
+ALTER USER asx_user CREATEDB;
+\c asx_financials
+GRANT ALL ON SCHEMA public TO asx_user;
+```
+
+### Setting Up PostgreSQL Database on Linux
+
+#### 1. Install PostgreSQL
+
+For Ubuntu/Debian:
+```bash
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+```
+
+For Red Hat/Fedora:
+```bash
+sudo dnf install postgresql-server postgresql-contrib
+sudo postgresql-setup --initdb
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+```
+
+#### 2. Create the Database and User
+
+Switch to the postgres user:
+```bash
+sudo -i -u postgres
+psql
+```
+
+Then follow the same SQL commands as in the macOS section.
+
+### 4. Initialize the Database Schema
+
+After setting up the database and user, you can initialize the schema:
+
+```bash
+python DBSchemaCreation.py
+```
+
+This will create all the necessary tables in your database.
+
+### 5. Reset the Database (if needed)
+
+To drop all tables and reset the database:
+
+```bash
+python drop_tables.py
+```
+
 ## Database Design
 The database is structured in PostgreSQL and optimized for time-series financial data. The schema follows a relational model that supports efficient queries for stock prices, financial reports, transactions, and user portfolios.
 
@@ -112,4 +258,3 @@ For larger-scale training, AWS will be used to leverage GPU-based cloud computin
 4. Optimize training pipelines for cost efficiency
 
 This project aims to build an end-to-end financial analysis system that leverages AI for predictive insights while ensuring efficient data management and scalability.
-
