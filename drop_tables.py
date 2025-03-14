@@ -121,7 +121,7 @@ def reset_database(dbname, user, password, host="localhost"):
 
 if __name__ == "__main__":
     # Database connection details - using the same as in the schema creation script
-    userpassword = input("password please")
+    userpassword = input("password?")
     reset_database(
         dbname="asx_financials",
         user="asx_user",
